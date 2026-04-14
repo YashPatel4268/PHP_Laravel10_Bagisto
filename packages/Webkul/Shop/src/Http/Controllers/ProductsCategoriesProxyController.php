@@ -75,6 +75,20 @@ class ProductsCategoriesProxyController extends Controller
             ->setSearchEngine($searchEngine ?? 'database')
             ->findBySlug($slugOrURLKey);
 
+        // if ($product) {
+        //     if (
+        //         ! $product->url_key
+        //         || ! $product->visible_individually
+        //         || ! $product->status
+        //     ) {
+        //         abort(404);
+        //     }
+
+        //     visitor()->visit($product);
+
+        //     return view('shop::products.view', compact('product'));
+        // }
+
         if ($product) {
             if (
                 ! $product->url_key
@@ -85,6 +99,15 @@ class ProductsCategoriesProxyController extends Controller
             }
 
             visitor()->visit($product);
+
+            // 👁️ Recently Viewed Feature
+            $recent = session()->get('recent_products', []);
+
+            array_unshift($recent, $product->id); // add latest on top
+            $recent = array_unique($recent);      // remove duplicates
+            $recent = array_slice($recent, 0, 5); // keep only last 5
+
+            session()->put('recent_products', $recent);
 
             return view('shop::products.view', compact('product'));
         }
